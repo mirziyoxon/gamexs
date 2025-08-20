@@ -1,0 +1,86 @@
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #1f1c2c, #928dab);
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.container {
+  text-align: center;
+}
+
+h1 {
+  margin-bottom: 20px;
+  font-size: 2.5em;
+  text-shadow: 2px 2px 8px #000;
+}
+
+.options {
+  margin-bottom: 15px;
+}
+
+label {
+  margin: 0 10px;
+  font-size: 1.1em;
+}
+
+#game {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 10px;
+  width: 90vw;      /* Use relative width for mobile */
+  max-width: 400px; /* Limit size on large screens */
+  aspect-ratio: 1;  /* Keep square shape */
+  margin: 0 auto 20px auto;
+}
+
+.cell {
+  background: rgba(255,255,255,0.1);
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 8vw;   /* Scale font size with viewport */
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.cell:hover {
+  background: rgba(255,255,255,0.2);
+  transform: scale(1.05);
+}
+
+.info {
+  margin-top: 10px;
+}
+
+#restart {
+  padding: 10px 20px;
+  font-size: 1em;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  background: #ff4d4d;
+  color: white;
+  transition: background 0.3s ease;
+}
+
+#restart:hover {
+  background: #ff1a1a;
+}
+
+.winning-cell {
+  background: #00ff99 !important;
+  animation: blink 0.5s infinite alternate;
+}
+
+@keyframes blink {
+  from {opacity: 1;}
+  to {opacity: 0.5;}
+}
