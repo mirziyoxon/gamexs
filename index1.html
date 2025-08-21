@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Smart 20 Questions (Offline)</title>
+  <link rel="stylesheet" href="styles1.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="top">
+      <h1>Smart 20 Questions</h1>
+      <div class="meta">
+        <span id="used">Questions used: 0 / 20</span>
+        <span id="cands">Candidates: —</span>
+      </div>
+    </header>
+
+    <main class="panel">
+      <p id="prompt">Think of any real-world thing (animal, object, person, food, etc.).<br/>I’ll try to guess it in 20 questions.</p>
+
+      <div id="question" class="q big">Ready to start?</div>
+
+      <div id="controls" class="controls">
+        <button id="btnStart" class="btn primary">Start</button>
+      </div>
+
+      <div id="hint" class="hint">Tip: use “Not sure / Skip” if the question doesn’t apply.</div>
+
+      <div id="log" class="log" aria-live="polite"></div>
+    </main>
+
+    <footer class="foot">
+      <button id="btnReset" class="btn subtle">Restart</button>
+    </footer>
+  </div>
+
+  <script src="script1.js"></script>
+</body>
+</html>
