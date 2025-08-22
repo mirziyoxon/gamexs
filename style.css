@@ -73,32 +73,3 @@ h1 {
   from {opacity: 1;}
   to {opacity: 0.5;}
 }
-
-
-body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      background-color: #f0f0f0;
-    }
-
-    /* Fixed clock at top-left */
-    #time {
-      position: fixed;
-      top: 10px;
-      left: 10px;
-      background-color: rgba(255, 255, 255, 0.8);
-      padding: 8px 12px;
-      border-radius: 5px;
-      font-size: 1.2rem;
-      font-weight: bold;
-      color: #333;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-      z-index: 1000; /* Always on top */
-    }
-@media (max-width: 600px) {
-  #time {
-    top: 10px;
-    right: 10px;
-    left: auto;
-  }
-}
