@@ -1,9 +1,9 @@
 /* Smart 20 Questions (static, offline)
    - Info-gain style question selection (heuristic)
    - Bayesian-like weighting per answer
-   - ìNot sure / Skipî
+   - ‚ÄúNot sure / Skip‚Äù
    - Only counts real questions (no intro)
-   - Guesses when confident; wonít give up early
+   - Guesses when confident; won‚Äôt give up early
 */
 
 // ---------- Config ----------
@@ -22,6 +22,7 @@ const btnReset = document.getElementById('btnReset');
 const btnStart = document.getElementById('btnStart');
 
 // ---------- Attributes (each becomes a Yes/No/Skip question) ----------
+// ---------- Attributes (questions) ----------
 const ATTRS = [
   { key:'alive',            q:'Is it alive?' },
   { key:'person',           q:'Is it a person?' },
@@ -56,52 +57,122 @@ const ATTRS = [
   { key:'athlete',          q:'Is it an athlete?' },
   { key:'entertainer',      q:'Is it an entertainer?' },
   { key:'politician',       q:'Is it a politician?' },
+  { key:'musical_instrument', q:'Is it a musical instrument?' },
+  { key:'wearable',         q:'Is it wearable?' },
+  { key:'toy',              q:'Is it a toy?' },
+  { key:'vehicle_air',      q:'Can it fly in the air?' },
+  { key:'vehicle_water',    q:'Does it travel on water?' },
+  { key:'vehicle_land',     q:'Does it travel on land?' }
 ];
 
-// ---------- Knowledge base (extensible) ----------
+// ---------- Knowledge base (entities) ----------
 const KB = [
-  // Animals & living things
+  // Animals
   E('Dog',   {alive:1, animal:1, mammal:1, pet:1, can_fly:0, bird:0, fish:0, plant:0, handheld:0, bigger_than_dog:0, domesticated:1, outdoors:1}),
   E('Cat',   {alive:1, animal:1, mammal:1, pet:1, can_fly:0, bird:0, fish:0, plant:0, handheld:0, bigger_than_dog:0, domesticated:1, outdoors:1}),
-  E('Lion',  {alive:1, animal:1, mammal:1, pet:0, can_fly:0, bird:0, fish:0, plant:0, handheld:0, bigger_than_dog:1, domesticated:0, outdoors:1}),
-  E('Eagle', {alive:1, animal:1, bird:1,  can_fly:1, mammal:0, fish:0, plant:0, handheld:0, outdoors:1}),
-  E('Parrot',{alive:1, animal:1, bird:1,  can_fly:1, pet:1, handheld:0, outdoors:1}),
-  E('Shark', {alive:1, animal:1, fish:1,  can_fly:0, pet:0, handheld:0, bigger_than_dog:1, outdoors:1}),
+  E('Lion',  {alive:1, animal:1, mammal:1, pet:0, can_fly:0, bigger_than_dog:1, domesticated:0, outdoors:1}),
+  E('Tiger', {alive:1, animal:1, mammal:1, pet:0, can_fly:0, bigger_than_dog:1, domesticated:0, outdoors:1}),
+  E('Elephant', {alive:1, animal:1, mammal:1, pet:0, bigger_than_dog:1, domesticated:0, outdoors:1}),
+  E('Giraffe', {alive:1, animal:1, mammal:1, bigger_than_dog:1, outdoors:1}),
+  E('Parrot',{alive:1, animal:1, bird:1, can_fly:1, pet:1, handheld:0, outdoors:1}),
+  E('Eagle', {alive:1, animal:1, bird:1, can_fly:1, mammal:0, outdoors:1}),
+  E('Shark', {alive:1, animal:1, fish:1, can_fly:0, pet:0, bigger_than_dog:1, outdoors:1}),
   E('Goldfish',{alive:1, animal:1, fish:1, pet:1, handheld:0, outdoors:0}),
-  E('Oak tree',{alive:1, plant:1, outdoors:1, handheld:0}),
-  E('Rose',  {alive:1, plant:1, outdoors:1, handheld:1}),
+  E('Frog', {alive:1, animal:1, amphibian:1, handheld:0, outdoors:1}),
+  E('Snake',{alive:1, animal:1, reptile:1, handheld:0, outdoors:1}),
+  E('Rabbit',{alive:1, animal:1, mammal:1, pet:1, handheld:0, outdoors:1}),
+  E('Horse',{alive:1, animal:1, mammal:1, bigger_than_dog:1, domesticated:1, outdoors:1}),
+  E('Dolphin',{alive:1, animal:1, mammal:1, bigger_than_dog:1, outdoors:1}),
+
+  // Plants
+  E('Rose',  {alive:1, plant:1, handheld:1, outdoors:1}),
+  E('Oak Tree',{alive:1, plant:1, outdoors:1, handheld:0}),
+  E('Cactus',{alive:1, plant:1, handheld:1, outdoors:1}),
+  E('Tulip',{alive:1, plant:1, handheld:1, outdoors:1}),
+  E('Sunflower',{alive:1, plant:1, outdoors:1}),
+
+  // Foods
+  E('Apple', {alive:0, food:1, fruit:1, handheld:1}),
+  E('Banana',{alive:0, food:1, fruit:1, handheld:1}),
+  E('Orange',{alive:0, food:1, fruit:1, handheld:1}),
+  E('Pizza',{alive:0, food:1, handheld:1}),
+  E('Burger',{alive:0, food:1, handheld:1}),
+  E('Water Bottle',{alive:0, drink:1, handheld:1}),
+  E('Coffee',{alive:0, drink:1, handheld:1}),
+  E('Milk',{alive:0, drink:1, handheld:1}),
+  E('Chocolate',{alive:0, food:1, handheld:1}),
+  E('Cake',{alive:0, food:1, handheld:0}),
+  E('Ice Cream',{alive:0, food:1, handheld:1}),
+  E('Sandwich',{alive:0, food:1, handheld:1}),
+
+  // Household / kitchen
+  E('Spoon', {alive:0, kitchen:1, metal:1, handheld:1}),
+  E('Fork',  {alive:0, kitchen:1, metal:1, handheld:1}),
+  E('Knife', {alive:0, kitchen:1, metal:1, handheld:1}),
+  E('Chair',{alive:0, furniture:1, handheld:0, bigger_than_dog:1}),
+  E('Table',{alive:0, furniture:1, handheld:0, bigger_than_dog:1}),
+  E('Book',{alive:0, has_pages:1, handheld:1}),
+  E('Pen',{alive:0, writing_tool:1, handheld:1}),
+  E('Notebook',{alive:0, writing_tool:1, handheld:1}),
+  E('Lamp',{alive:0, handheld:0, uses_electricity:1}),
+
+  // Electronics
+  E('Phone',{alive:0, electronic:1, uses_electricity:1, has_screen:1, phone:1, handheld:1}),
+  E('Laptop',{alive:0, electronic:1, uses_electricity:1, has_screen:1, computer:1, handheld:0}),
+  E('Tablet',{alive:0, electronic:1, uses_electricity:1, has_screen:1, computer:1, handheld:1}),
+  E('Smartwatch',{alive:0, electronic:1, uses_electricity:1, has_screen:1, handheld:1, wearable:1}),
+  E('TV',{alive:0, electronic:1, uses_electricity:1, has_screen:1, handheld:0}),
+  E('Refrigerator',{alive:0, electronic:1, uses_electricity:1, kitchen:1, metal:1, handheld:0, bigger_than_dog:1}),
+  E('Microwave',{alive:0, electronic:1, uses_electricity:1, kitchen:1, metal:1, handheld:0}),
+  E('Headphones',{alive:0, electronic:1, uses_electricity:1, handheld:1, wearable:1}),
+  E('Camera',{alive:0, electronic:1, uses_electricity:1, handheld:1}),
+  E('Printer',{alive:0, electronic:1, uses_electricity:1, handheld:0}),
+
+  // Vehicles
+  E('Car',{alive:0, vehicle:1, two_wheels:0, handheld:0, bigger_than_dog:1, outdoors:1, vehicle_land:1}),
+  E('Bicycle',{alive:0, vehicle:1, two_wheels:1, handheld:0, outdoors:1, vehicle_land:1}),
+  E('Motorcycle',{alive:0, vehicle:1, two_wheels:1, handheld:0, outdoors:1, vehicle_land:1}),
+  E('Airplane',{alive:0, vehicle:1, two_wheels:0, handheld:0, outdoors:1, vehicle_air:1}),
+  E('Boat',{alive:0, vehicle:1, two_wheels:0, handheld:0, outdoors:1, vehicle_water:1}),
+  E('Helicopter',{alive:0, vehicle:1, handheld:0, outdoors:1, vehicle_air:1}),
+  E('Bus',{alive:0, vehicle:1, two_wheels:0, handheld:0, outdoors:1, bigger_than_dog:1, vehicle_land:1}),
+
+  // Sports / Toys
+  E('Ball',{alive:0, sports:1, handheld:1, toy:1}),
+  E('Football',{alive:0, sports:1, handheld:1, toy:1}),
+  E('Tennis Racket',{alive:0, sports:1, handheld:1}),
+  E('Skateboard',{alive:0, sports:1, handheld:0, outdoors:1}),
+  E('Bicycle Helmet',{alive:0, handheld:1, wearable:1, outdoors:1}),
+  E('Puzzle',{alive:0, toy:1, handheld:1}),
+  E('Doll',{alive:0, toy:1, handheld:1}),
 
   // People
-  E('A singer',     {alive:1, person:1, entertainer:1}),
-  E('A politician', {alive:1, person:1, politician:1}),
-  E('A footballer', {alive:1, person:1, athlete:1}),
+  E('A singer',{alive:1, person:1, entertainer:1}),
+  E('A politician',{alive:1, person:1, politician:1}),
+  E('A footballer',{alive:1, person:1, athlete:1}),
+  E('A teacher',{alive:1, person:1}),
+  E('A doctor',{alive:1, person:1}),
+  E('A chef',{alive:1, person:1}),
+  E('A dancer',{alive:1, person:1, entertainer:1}),
 
-  // Tech & electronics
-  E('Phone',     {alive:0, electronic:1, uses_electricity:1, has_screen:1, phone:1, handheld:1, kitchen:0}),
-  E('Laptop',    {alive:0, electronic:1, uses_electricity:1, has_screen:1, computer:1, handheld:0}),
-  E('TV',        {alive:0, electronic:1, uses_electricity:1, has_screen:1, handheld:0}),
-  E('Refrigerator',{alive:0, electronic:1, uses_electricity:1, kitchen:1, metal:1, handheld:0, bigger_than_dog:1}),
-  E('Microwave', {alive:0, electronic:1, uses_electricity:1, kitchen:1, metal:1, handheld:0}),
-  E('Car',       {alive:0, vehicle:1, two_wheels:0, handheld:0, bigger_than_dog:1, outdoors:1}),
-  E('Bicycle',   {alive:0, vehicle:1, two_wheels:1, handheld:0, outdoors:1}),
+  // Countries
+  E('United States',{alive:0, country:1}),
+  E('China',{alive:0, country:1}),
+  E('France',{alive:0, country:1}),
+  E('Japan',{alive:0, country:1}),
+  E('Brazil',{alive:0, country:1}),
+  E('Australia',{alive:0, country:1}),
+  E('Russia',{alive:0, country:1}),
+  E('India',{alive:0, country:1}),
 
-  // Household / tools
-  E('Spoon',     {alive:0, kitchen:1, metal:1, handheld:1}),
-  E('Knife',     {alive:0, kitchen:1, metal:1, handheld:1}),
-  E('Chair',     {alive:0, furniture:1, handheld:0, bigger_than_dog:1}),
-  E('Book',      {alive:0, has_pages:1, handheld:1}),
-  E('Pen',       {alive:0, writing_tool:1, handheld:1}),
-
-  // Food & drink
-  E('Apple',     {alive:0, food:1, fruit:1, handheld:1}),
-  E('Pizza',     {alive:0, food:1, handheld:1}),
-  E('Water bottle',{alive:0, drink:1, handheld:1}),
-
-  // Misc / places / nature
-  E('Ball',      {alive:0, sports:1, handheld:1}),
-  E('Mountain',  {alive:0, outdoors:1, handheld:0, bigger_than_dog:1}),
-  E('United States (country)', {alive:0, country:1})
+  // Misc / Nature
+  E('Mountain',{alive:0, outdoors:1, handheld:0, bigger_than_dog:1}),
+  E('River',{alive:0, outdoors:1, handheld:0}),
+  E('Sun',{alive:0, outdoors:1}),
+  E('Moon',{alive:0, outdoors:1}),
+  E('Star',{alive:0, outdoors:1})
 ];
+
 
 // Helper: define entity with attributes
 function E(name, attrs){ return { name, attrs }; }
@@ -110,7 +181,7 @@ function E(name, attrs){ return { name, attrs }; }
 let asked = new Set();            // attribute keys already asked
 let weights = [];                 // per-candidate weights
 let questionsUsed = 0;            // real questions only
-let answeringAttr = null;         // which attr weíre currently asking
+let answeringAttr = null;         // which attr we‚Äôre currently asking
 let inGuess = false;              // are we asking "Am I right?"
 
 reset();
@@ -120,7 +191,7 @@ btnStart.addEventListener('click', startGame);
 btnReset.addEventListener('click', reset);
 
 function startGame(){
-  // Donít count ìReady to start?î as a question
+  // Don‚Äôt count ‚ÄúReady to start?‚Äù as a question
   promptEl.style.display = 'none';
   controls.innerHTML = [
     `<button class="btn" id="btnYes">Yes</button>`,
@@ -141,7 +212,7 @@ function reset(){
   inGuess = false;
   qEl.textContent = 'Ready to start?';
   usedEl.textContent = `Questions used: 0 / ${LIMIT}`;
-  candsEl.textContent = 'Candidates: ó';
+  candsEl.textContent = 'Candidates: ‚Äî';
   controls.innerHTML = '';
   promptEl.style.display = '';
   logEl.innerHTML = '';
@@ -163,9 +234,9 @@ function onAnswer(ans){
       weights[idx] *= 0.01;
       normalizeWeights();
       inGuess = false;
-      log(`? Not ${best.name}. Iíll keep narrowing it down.`);
+      log(`? Not ${best.name}. I‚Äôll keep narrowing it down.`);
       if(questionsUsed >= LIMIT){
-        finish(false, `Iím out of questions. You win! ??`);
+        finish(false, `I‚Äôm out of questions. You win! ??`);
         return;
       }
       askNext(); // continue questioning
@@ -190,7 +261,7 @@ function onAnswer(ans){
     if(prob > 0.15){
       askGuess();
     }else{
-      finish(false, `Iím out of questions. You win! ??`);
+      finish(false, `I‚Äôm out of questions. You win! ??`);
     }
     return;
   }
@@ -219,11 +290,11 @@ function askNext(){
 function askGuess(){
   const {name, prob} = bestCandidate();
   if(!name){
-    finish(false, `I canít narrow it down enough. You win! ??`);
+    finish(false, `I can‚Äôt narrow it down enough. You win! ??`);
     return;
   }
   inGuess = true;
-  qEl.textContent = `I think itís **${name}**. Am I right? (${(prob*100).toFixed(1)}% sure)`;
+  qEl.textContent = `I think it‚Äôs **${name}**. Am I right? (${(prob*100).toFixed(1)}% sure)`;
   controls.innerHTML = [
     `<button class="btn" id="gYes">Yes</button>`,
     `<button class="btn" id="gNo">No</button>`,
@@ -320,3 +391,4 @@ function log(text){
   pill.textContent = text;
   logEl.prepend(pill);
 }
+
